@@ -1,0 +1,20 @@
+﻿@inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime
+@inject NavigationManager navigation
+
+<PageTitle>OneSoft</PageTitle>
+
+<CascadingValue Value="this">
+  <main id="main">
+    <aside id="sidebar">
+      <NavMenu />
+    </aside>
+    <section id="content">
+      @Body
+    </section>
+  </main>
+</CascadingValue>
+
+@code {
+  
+}
