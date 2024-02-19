@@ -1,0 +1,17 @@
+﻿{
+  "short_name": "ONETEZ",
+  "name": "ONETEZ SOFTWARE",
+  "description": "ONETEZ SOFTWARE - Phần mềm quản lý doanh nghiệp",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "theme_color": "#004555",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}

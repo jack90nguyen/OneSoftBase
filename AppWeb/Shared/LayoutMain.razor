@@ -1,0 +1,72 @@
+﻿@inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime
+@inject NavigationManager navigation
+
+<CascadingValue Value="this">
+  <main id="main" class="columns is-gapless is-multiline">
+    @if (User != null)
+    {
+      <section id="header" class="column is-full">
+        <Header />
+      </section>
+      <section id="content" class="column is-full">
+        @Body
+      </section>
+    }
+    else
+    {
+      <section class="column is-full movingBallG"></section>
+    }
+  </main>
+</CascadingValue>
+
+@code {
+  public UserModel User = null;
+  public string UrlPath = string.Empty;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await Task.Delay(1);
+  }
+
+  protected override void OnParametersSet()
+  {
+    UrlPath = navigation.Uri.Replace(navigation.BaseUri, "/");
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      try
+      {
+        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "_login");
+        if (string.IsNullOrEmpty(cookie))
+        {
+          navigation.NavigateTo("/", true);
+          return;
+        }
+        else
+        {
+          User = await UserData.GetBySession(cookie);
+          if (User == null)
+          {
+            navigation.NavigateTo("/", true);
+            return;
+          }
+          else
+          {
+            await JSRuntime.InvokeVoidAsync("console.log", $"UserId = {User.Id} | Email = {User.Username}");
+          }
+        }
+        await InvokeAsync(StateHasChanged);
+      }
+      catch (Exception ex)
+      {
+        await JSRuntime.InvokeVoidAsync("console.log", ex.Message);
+        navigation.NavigateTo("/", true);
+        return;
+      }
+    }
+  }
+}

@@ -1,0 +1,78 @@
+@media (max-height: 780px) {
+  #sidebar.is_less nav > ul > li.is_up > ul {
+    top: auto;
+    bottom: -5px;
+    padding-top: 8px;
+    padding-bottom: 45px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --form-small: 100%;
+    --form-medium: 100%;
+  }
+
+  html {
+    overflow-y: auto;
+  }
+
+  #main {
+    height: auto;
+  }
+
+  #sidebar,
+  #content {
+    width: 100%;
+    height: auto !important;
+  }
+
+  #sidebar {
+    padding: 0.5rem 0 !important;
+  }
+
+  #sidebar .slimScrollDiv,
+  #sidebar #navScroll {
+    height: auto !important;
+  }
+
+  #sidebar .slimScrollDiv {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+    padding-right: 0px;
+    margin-right: 0px;
+  }
+
+  #sidebar:not(.is_expanded) nav,
+  #sidebar:not(.is_expanded) .btn_logout {
+    display: none;
+  }
+
+  #sidebar.is_expanded {
+    padding-bottom: 55px !important;
+  }
+
+  .sidebar_toggle {
+    width: 44px;
+  }
+
+  .sidebar_toggle span {
+    width: 100% !important;
+  }
+
+  .modal-card,
+  .modal-content {
+    width: 100% !important;
+  }
+
+  .pagination {
+    justify-content: space-between;
+    padding: 0px 10px;
+  }
+
+  .pagination-next,
+  .pagination-previous {
+    flex-grow: 0;
+    order: 3;
+  }
+}

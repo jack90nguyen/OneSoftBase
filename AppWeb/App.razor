@@ -1,0 +1,32 @@
+﻿@inject NavigationManager navigation
+
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+   <Found Context="routeData">
+      <RouteView RouteData="@routeData" DefaultLayout="@typeof(LayoutMain)" />
+   </Found>
+   <NotFound>
+      <LayoutView Layout="@typeof(LayoutMain)">
+         <main class="p-4">
+            <ul class="columns is-centered is-vcentered is-mobile" style="min-height: 90vh">
+               <li class="column is-narrow" style="width: 400px;">
+                  <div class="card">
+                     <div class="card-header">
+                        <div class="card-header-title is-uppercase is-centered is-size-5">
+                          Page not found
+                        </div>
+                     </div>
+                     <div class="card-content px-4 py-5">
+                        <div class="content is-size-6 has-text-weight-medium" style="text-align: center;">
+                          URL: <a href="@navigation.Uri">@navigation.Uri</a>
+                          <br>
+                          Not found
+                          <br>
+                        </div>
+                     </div>
+                  </div>
+               </li>
+            </ul>
+         </main>
+      </LayoutView>
+   </NotFound>
+</Router>

@@ -1,0 +1,65 @@
+<div class="columns is-gapless is-mobile is-vcentered mt-3">
+  <div class="column">
+    Có <span class="has-text-weight-semibold">@total</span> kết quả
+  </div>
+  <div class="column is-narrow">
+    @if(total > size)
+    {
+      int count = SharedHelper.Paging(total, size);
+
+      <div class="field has-addons">
+        <div class="control">
+          <div class="select">
+            <select class="pl-5" @onchange="ChangePage">
+              @for (int i = 1; i <= count; i++)
+              {
+                if(i == page)
+                {
+                  <option value="@i" selected>Trang @i / @count</option>
+                }
+                else
+                {
+                  <option value="@i">Trang @i / @count</option>
+                }
+              }
+            </select>
+          </div>
+        </div>
+        <div class="control">
+          <a class="button" @onclick="() => NextPage(false)">
+            <i class="feather icon-chevron-left"></i>
+          </a>
+        </div>
+        <div class="control">
+          <a class="button" @onclick="() => NextPage(true)">
+            <i class="feather icon-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@code {
+  [Parameter]
+  public int page { get; set; }
+  [Parameter]
+  public int total { get; set; }
+  [Parameter]
+  public int size { get; set; }
+  [Parameter]
+  public EventCallback<int> OnChange { get; set; }
+
+  private async Task NextPage(bool isNext)
+  {
+    page = isNext ? page + 1 : page - 1;
+    if(page < 1) page = 1;
+    await OnChange.InvokeAsync(page);
+  }
+
+  private async Task ChangePage(ChangeEventArgs e)
+  {
+    page = Convert.ToInt32(e.Value);
+    await OnChange.InvokeAsync(page);
+  }
+}

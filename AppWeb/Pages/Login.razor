@@ -1,0 +1,112 @@
+﻿@page "/"
+@layout LayoutLogin
+@inject IJSRuntime JSRuntime
+@inject ProtectedLocalStorage storage
+@inject NavigationManager navigation
+
+<div class="card p-5" style="opacity: @(loading ? "0" : "1")">
+  @if (user == null)
+  {
+    <h1 class="title is-5 has-text-info has-text-weight-bold is-uppercase">
+      Husble Spy
+    </h1>
+    <form @onsubmit="SignIn">
+      <div class="field">
+        <label class="label">Username</label>
+        <div class="control has-icons-left">
+          <input @bind="username" type="text" class="input" placeholder="Enter username..." />
+          <span class="icon is-left">
+            <i class="material-icons-outlined is-size-5">account_circle</i>
+          </span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Password</label>
+        <div class="control has-icons-left">
+          <input @bind="password" type="password" class="input" placeholder="Enter password..." />
+          <span class="icon is-left">
+            <i class="material-icons-outlined is-size-5">lock</i>
+          </span>
+        </div>
+      </div>
+    </form>
+    <div class="field is-grouped is-vcentered mt-5">
+      <div class="control is-expanded">
+        <a class="button is-link" @onclick="SignIn">
+          <span class="icon">
+            <i class="material-icons-outlined is-size-6">login</i>
+          </span>
+          <span>Login</span>
+        </a>
+      </div>
+    </div>
+  }
+</div>
+
+@code {
+  private bool loading = true;
+  private string username = string.Empty;
+  private string password = string.Empty;
+  private UserModel user = null;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      try
+      {
+        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "_login");
+        if (!string.IsNullOrEmpty(cookie))
+        {
+          user = await UserData.GetBySession(cookie);
+          if (user != null)
+            navigation.NavigateTo("/home", true);
+        }
+        else
+        {
+          await JSRuntime.InvokeVoidAsync("deleteCookie", "_login");
+        }
+      }
+      catch (Exception)
+      {
+        navigation.NavigateTo("/logout", true);
+      }
+    }
+    loading = false;
+    StateHasChanged();
+  }
+
+  private async Task SignIn()
+  {
+    if(username.IsEmpty() || password.IsEmpty())
+      await JSRuntime.InvokeVoidAsync("tagline", false, "Username or password is empty!");
+    else
+    {
+      user = await UserService.Login(username, password);
+      if (user != null)
+      {
+        // Update session login
+        if(user.Session.IsEmpty())
+          user.Session = StringHelper.CreateMD5(DataService.RandomId());
+        await UserData.UpdateSession(user.Id, user.Session);
+        await JSRuntime.InvokeVoidAsync("setCookie", "_login", user.Session);
+        navigation.NavigateTo("/home", true);
+      }
+      else
+      {
+        await JSRuntime.InvokeVoidAsync("tagline", false, "Username or password is incorrect!");
+      }
+    }
+  }
+
+  private async Task Create()
+  {
+    user = new UserModel()
+    {
+      Username = "jack90nguyen",
+      Password = "123456@#"
+    };
+    await UserData.Create(user);
+    await JSRuntime.InvokeVoidAsync("tagline", true, "Create user success !");
+  }
+}

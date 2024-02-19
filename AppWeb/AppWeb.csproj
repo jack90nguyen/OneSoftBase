@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="wwwroot\upload\**" />
+    <Content Remove="wwwroot\upload\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AKSoftware.Blazor.Utilities" Version="1.0.0" />
+    <PackageReference Include="BlazorDateRangePicker" Version="4.3.0" />
+    <PackageReference Include="Blazored.TextEditor" Version="1.0.8" />
+    <PackageReference Include="BlazorNumericTextBox" Version="3.0.0" />
+    <PackageReference Include="ClosedXML" Version="0.97.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Excel">
+      <HintPath>\Excel.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppCore\AppCore.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,89 @@
+@inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime
+@inject NavigationManager navigation
+
+<nav class="navbar">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="/home">
+      <img src="https://husble.com/wp-content/uploads/2023/04/husble-logo-1.png" alt="Logo">
+    </a>
+
+    <a class="navbar-burger" @onclick="() => toggle = !toggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </a>
+  </div>
+
+  <div class="navbar-menu @(toggle ? "is-active" : "")">
+    <div class="navbar-start">
+      @foreach (var item in navList)
+      {
+        <a class="navbar-item has-text-weight-medium @(item.Active ? "is-active" : "")" href="@item.Url">
+          <span class="icon mr-2">
+            <i class="material-icons-outlined is-size-5">@item.Icon</i>
+          </span>
+          <span>@item.Name</span>
+        </a>
+      }
+    </div>
+
+    <div class="navbar-end">
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          <a class="icon-text">
+            <span class="icon image is-rounded">
+              <img src="@Layout.User.Avatar" alt="IMG">
+            </span>
+            <span></span>
+          </a>
+        </a>
+
+        <div class="navbar-dropdown is-right">
+          <a class="navbar-item px-3">
+            Hi, @Layout.User.Username
+          </a>
+          <hr class="navbar-divider">
+          <a class="navbar-item has-text-danger px-3" @onclick="Logout">
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+@code {
+  [CascadingParameter]
+  public LayoutMain Layout { get; set; }
+  private bool toggle = false;
+  private List<NavModel> navList = new List<NavModel>();
+
+  protected override void OnInitialized()
+  {
+    navList = new List<NavModel>
+    {
+      new NavModel { Name = "Home", Url = "/home", Icon = "home" },
+      new NavModel { Name = "Posts ID", Url = "/fb/posts", Icon = "post_add" },
+      new NavModel { Name = "Fanpage", Url = "/fb/pages", Icon = "list_alt" },
+      new NavModel { Name = "Ads Library", Url = "/fb/ads", Icon = "library_books" },
+      new NavModel { Name = "Users", Url = "/users", Icon = "people_alt" },
+    };
+  
+  }
+
+  protected override void OnParametersSet()
+  {
+    foreach (var item in navList)
+    {
+      item.Active = Layout.UrlPath.StartsWith(item.Url);
+    }
+  }
+
+  private async Task Logout()
+  {
+    if (!await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to sign out?"))
+      return;
+    navigation.NavigateTo("/login");
+  }
+}

@@ -1,0 +1,119 @@
+@inject IJSRuntime JSRuntime
+@inject NavigationManager navigation
+
+@if(model != null)
+{
+  <section class="modal is-active">
+    <div class="modal-background"></div>
+    <section class="modal-card is-small">
+      <header class="modal-card-head">
+        <div class="modal-card-title">
+          @(model.Id.IsEmpty() ? "Add User" : "Edit User")
+        </div>
+        <a class="delete" @onclick="Cancel"></a>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label">Username</label>
+          <div class="control">
+            @if(model.Id.IsEmpty())
+            {
+              <input @bind="model.Username" type="text" class="input" placeholder="Enter username...">
+            }
+            else
+            {
+              <input type="text" class="input has-background-light" value="@model.Username" readonly>
+            }
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <div class="control">
+            <input @bind="password" type="text" class="input" placeholder="Enter password...">
+          </div>
+        </div>
+        <div class="field is-grouped">
+          <div class="control is-expanded">
+            <div class="field">
+              <label class="label">Role</label>
+              <div class="control">
+                <div class="select">
+                  <select @bind="model.Role">
+                    @foreach (var item in Enum.GetValues(typeof(UserModel.RoleEnum)))
+                    {
+                      <option>@item</option>
+                    }
+                  </select>
+               </div>
+              </div>
+            </div>
+          </div>
+          <div class="control is-expanded">
+            <div class="field">
+              <label class="label">Status</label>
+              <div class="control">
+                <label class="checkbox">
+                  <input @bind="model.IsActive" type="checkbox">
+                  <span>Active</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <a class="button is-link is-small" @onclick="Update">
+          <span class="icon">
+            <i class="material-icons-round is-size-6">done</i>
+          </span>
+          <span>Update</span>
+        </a>
+        <a class="button is-small" @onclick="Cancel">
+          <span class="icon">
+            <i class="material-icons-round is-size-6">close</i>
+          </span>
+          <span>Cancel</span>
+        </a>
+      </footer>
+    </section>
+  </section>
+}
+
+@code {
+  [CascadingParameter]
+  public LayoutMain Layout { get; set; }
+  [Parameter]
+  public UserModel model { get; set; }
+  [Parameter]
+  public EventCallback<string> OnUpdate { get; set; }
+  private string password = string.Empty;
+  
+  private async Task Cancel()
+  {
+    await OnUpdate.InvokeAsync(null);
+  }
+  
+  private async Task Update()
+  {
+    if(model.Id.IsEmpty())
+    {
+      if(model.Username.IsEmpty() || password.IsEmpty())
+        await JSRuntime.InvokeVoidAsync("tagline", false, "Username and password are required!");
+      else
+      {
+        model.Password = password;
+        await UserData.Create(model);
+        await OnUpdate.InvokeAsync(model.Id);
+        await JSRuntime.InvokeVoidAsync("tagline", true, "User added successfully!");
+      }
+    }
+    else
+    {
+      if(!password.IsEmpty())
+        model.Password = StringHelper.CreateMD5(password);
+      await UserData.Update(model);
+      await OnUpdate.InvokeAsync(model.Id);
+      await JSRuntime.InvokeVoidAsync("tagline", true, "User updated successfully!");
+    }
+  }
+}

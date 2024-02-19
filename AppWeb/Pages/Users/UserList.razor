@@ -1,0 +1,113 @@
+@page "/users"
+@inject IJSRuntime JSRuntime
+@inject NavigationManager navigation
+
+<PageTitle>User Management</PageTitle>
+
+<section class="p-3">
+  <section class="card">
+    <div class="card-header">
+      <div class="card-header-title is-uppercase">
+        User Management
+      </div>
+      <div class="card-header-icon">
+        <a class="button is-small" @onclick="() => EditItem(null)">
+          <span class="icon">
+            <i class="material-icons-outlined is-size-6">add</i>
+          </span>
+          <span>Add</span>
+        </a>
+      </div>
+    </div>
+    <div class="card-content py-1 px-0">
+      <table class="table is-fullwidth is-vcentered is-size-14">
+        <thead>
+          <tr class="has-text-weight-semibold">
+            <th>Username</th>
+            <th width="20%">Role</th>
+            <th width="20%">Status</th>
+            <th width="100px" align="center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var item in dataList)
+          {
+            <tr>
+              <td>
+                <a class="icon-text">
+                  <span class="icon image is-rounded mr-2">
+                    <img src="@item.Avatar" alt="IMG">
+                  </span>
+                  <span>@item.Username</span>
+                </a>
+              </td>
+              <td>@item.Role</td>
+              <td>
+                @if(item.IsActive)
+                {
+                  <span class="has-text-success">Active</span>
+                }
+                else
+                {
+                  <span class="has-text-danger">Inactive</span>
+                }
+              </td>
+              <td align="center">
+                <a class="button is-small is-link" @onclick="() => EditItem(item)">
+                  <span class="icon">
+                    <i class="material-icons-outlined is-size-6">edit</i>
+                  </span>
+                  <span>Edit</span>
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<UserEdit model="editItem" OnUpdate="RefeshItem" />
+
+@code {
+  [CascadingParameter]
+  public LayoutMain Layout { get; set; }
+  private List<UserModel> dataList = new();
+  private UserModel editItem = null;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await GetList();
+  }
+
+  private async Task GetList()
+  {
+    dataList = await UserData.GetAll();
+  }
+
+  private async Task EditItem(UserModel item)
+  {
+    if(item != null)
+      editItem = await UserData.GetById(item.Id);
+    else
+      editItem = new UserModel();
+  }
+
+  private async Task RefeshItem(string id)
+  {
+    if(!string.IsNullOrEmpty(id))
+    {
+      var item = await UserData.GetById(id);
+      if(item != null)
+      {
+        var index = dataList.FindIndex(x => x.Id == id);
+        if(index > -1)
+          dataList[index] = item;
+        else
+          dataList.Insert(0, item);
+      }
+    }
+    editItem = null;
+  }
+}
