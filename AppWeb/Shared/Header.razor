@@ -5,7 +5,7 @@
 <nav class="navbar">
   <div class="navbar-brand">
     <a class="navbar-item" href="/home">
-      <img src="https://husble.com/wp-content/uploads/2023/04/husble-logo-1.png" alt="Logo">
+      <img src="/favicon.png" alt="Logo">
     </a>
 
     <a class="navbar-burger" @onclick="() => toggle = !toggle">
@@ -20,10 +20,12 @@
       @foreach (var item in navList)
       {
         <a class="navbar-item has-text-weight-medium @(item.Active ? "is-active" : "")" href="@item.Url">
-          <span class="icon mr-2">
-            <i class="material-icons-outlined is-size-5">@item.Icon</i>
-          </span>
-          <span>@item.Name</span>
+          <div class="icon-text">
+            <span class="icon mr-2">
+              <i class="material-icons is-size-5">@item.Icon</i>
+            </span>
+            <span>@item.Name</span>
+          </div>
         </a>
       }
     </div>
@@ -63,13 +65,12 @@
   {
     navList = new List<NavModel>
     {
-      new NavModel { Name = "Home", Url = "/home", Icon = "home" },
-      new NavModel { Name = "Posts ID", Url = "/fb/posts", Icon = "post_add" },
-      new NavModel { Name = "Fanpage", Url = "/fb/pages", Icon = "list_alt" },
-      new NavModel { Name = "Ads Library", Url = "/fb/ads", Icon = "library_books" },
-      new NavModel { Name = "Users", Url = "/users", Icon = "people_alt" },
+      new() { Name = "Home", Url = "/home", Icon = "home" },
     };
-  
+    if(Layout.User.Role == UserModel.RoleEnum.Admin)
+    {
+      navList.Add(new() { Name = "Users", Url = "/users", Icon = "people_alt" });
+    }
   }
 
   protected override void OnParametersSet()
@@ -84,6 +85,7 @@
   {
     if (!await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to sign out?"))
       return;
+    await JSRuntime.InvokeVoidAsync("deleteCookie", "_user");
     navigation.NavigateTo("/login");
   }
 }

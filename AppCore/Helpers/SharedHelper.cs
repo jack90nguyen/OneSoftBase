@@ -18,4 +18,13 @@ public class SharedHelper
       col = total / size;
     return col;
   }
+
+  /// <summary>
+  /// Get Avatar URL
+  /// </summary>
+  public static string Avatar(string text)
+  {
+    string link = "https://ui-avatars.com/api/?background=random&length=1&font-size=0.6&name=";
+    return link + text.Replace(" ", "+");
+  }
 }

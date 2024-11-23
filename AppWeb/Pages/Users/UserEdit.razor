@@ -8,7 +8,7 @@
     <section class="modal-card is-small">
       <header class="modal-card-head">
         <div class="modal-card-title">
-          @(model.Id.IsEmpty() ? "Add User" : "Edit User")
+          @(model.Id == 0 ? "Add User" : "Edit User")
         </div>
         <a class="delete" @onclick="Cancel"></a>
       </header>
@@ -16,7 +16,7 @@
         <div class="field">
           <label class="label">Username</label>
           <div class="control">
-            @if(model.Id.IsEmpty())
+            @if(model.Id == 0)
             {
               <input @bind="model.Username" type="text" class="input" placeholder="Enter username...">
             }
@@ -85,17 +85,17 @@
   [Parameter]
   public UserModel model { get; set; }
   [Parameter]
-  public EventCallback<string> OnUpdate { get; set; }
+  public EventCallback<long> OnUpdate { get; set; }
   private string password = string.Empty;
   
   private async Task Cancel()
   {
-    await OnUpdate.InvokeAsync(null);
+    await OnUpdate.InvokeAsync(0);
   }
   
   private async Task Update()
   {
-    if(model.Id.IsEmpty())
+    if(model.Id != 0)
     {
       if(model.Username.IsEmpty() || password.IsEmpty())
         await JSRuntime.InvokeVoidAsync("tagline", false, "Username and password are required!");

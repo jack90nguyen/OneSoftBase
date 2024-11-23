@@ -40,7 +40,7 @@
     {
       try
       {
-        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "_login");
+        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "_user");
         if (string.IsNullOrEmpty(cookie))
         {
           navigation.NavigateTo("/", true);

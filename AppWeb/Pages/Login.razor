@@ -1,4 +1,5 @@
 ﻿@page "/"
+@page "/login"
 @layout LayoutLogin
 @inject IJSRuntime JSRuntime
 @inject ProtectedLocalStorage storage
@@ -8,7 +9,7 @@
   @if (user == null)
   {
     <h1 class="title is-5 has-text-info has-text-weight-bold is-uppercase">
-      Husble Spy
+      @DataService.AppTitle
     </h1>
     <form @onsubmit="SignIn">
       <div class="field">
@@ -55,7 +56,7 @@
     {
       try
       {
-        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "_login");
+        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "_user");
         if (!string.IsNullOrEmpty(cookie))
         {
           user = await UserData.GetBySession(cookie);
@@ -64,7 +65,7 @@
         }
         else
         {
-          await JSRuntime.InvokeVoidAsync("deleteCookie", "_login");
+          await JSRuntime.InvokeVoidAsync("deleteCookie", "_user");
         }
       }
       catch (Exception)
@@ -87,9 +88,9 @@
       {
         // Update session login
         if(user.Session.IsEmpty())
-          user.Session = StringHelper.CreateMD5(DataService.RandomId());
+          user.Session = StringHelper.CreateMD5(RandomHelper.Guid());
         await UserData.UpdateSession(user.Id, user.Session);
-        await JSRuntime.InvokeVoidAsync("setCookie", "_login", user.Session);
+        await JSRuntime.InvokeVoidAsync("setCookie", "_user", user.Session);
         navigation.NavigateTo("/home", true);
       }
       else

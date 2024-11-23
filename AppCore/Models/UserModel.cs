@@ -5,7 +5,7 @@ namespace AppCore.Models;
 public class UserModel
 {
   [BsonId]
-  public string Id { get; set; }
+  public long Id { get; set; }
 
   /// <summary>Password</summary>
   public string Password { get; set; }

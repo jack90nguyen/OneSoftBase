@@ -1,31 +1,29 @@
 ﻿
+using MongoDB.Bson;
+
 namespace AppCore.Data
 {
   public class UserData
   {
     private static IMongoDatabase _db = DataService.DbConnect();
-    private static string _collection = "Users";
+    private static readonly IMongoCollection<UserModel> _collection = _db.GetCollection<UserModel>("Users");
 
     public static async Task<UserModel> Create(UserModel model)
     {
-      model.Id = DataService.RandomId();
-      model.Avatar = DataService.AvatarUrl + model.Username.Replace(" ", "+");
+      model.Id = RandomHelper.NumberID();
+      model.Avatar = SharedHelper.Avatar(model.Username);
       model.Username = model.Username.Trim().ToLower();
       model.Password = StringHelper.CreateMD5(model.Password);
 
-      var collection = _db.GetCollection<UserModel>(_collection);
-
-      await collection.InsertOneAsync(model);
+      await _collection.InsertOneAsync(model);
 
       return model;
     }
 
 
-    public static async Task<bool> Delete(string id)
+    public static async Task<bool> Delete(long id)
     {
-      var collection = _db.GetCollection<UserModel>(_collection);
-
-      var result = await collection.DeleteOneAsync(x => x.Id == id);
+      var result = await _collection.DeleteOneAsync(x => x.Id == id);
 
       if (result.DeletedCount > 0)
         return true;
@@ -36,11 +34,9 @@ namespace AppCore.Data
 
     public static async Task<UserModel> Update(UserModel model)
     {
-      var collection = _db.GetCollection<UserModel>(_collection);
-
       var option = new ReplaceOptions { IsUpsert = false };
 
-      var result = await collection.ReplaceOneAsync(x => x.Id == model.Id, model, option);
+      var result = await _collection.ReplaceOneAsync(x => x.Id == model.Id, model, option);
 
       return model;
     }
@@ -48,49 +44,58 @@ namespace AppCore.Data
     /// <summary>
     /// Cập nhật Session
     /// </summary>
-    public static async Task UpdateSession(string id, string session)
+    public static async Task UpdateSession(long id, string session)
     {
-      var collection = _db.GetCollection<UserModel>(_collection);
-
        var update = Builders<UserModel>.Update
         .Set(x => x.Session, session);
 
-      var result = await collection.UpdateOneAsync(x => x.Id == id, update);
+      var result = await _collection.UpdateOneAsync(x => x.Id == id, update);
     }
 
 
-    public static async Task<UserModel> GetById(string id)
+    public static async Task<UserModel> GetById(long id)
     {
-      var collection = _db.GetCollection<UserModel>(_collection);
-
-      return await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
+      return await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
     }
 
     public static async Task<UserModel> GetByUsername(string username)
     {
-      var collection = _db.GetCollection<UserModel>(_collection);
-
-      return await collection.Find(x => x.Username == username).FirstOrDefaultAsync();
+      return await _collection.Find(x => x.Username == username).FirstOrDefaultAsync();
     }
 
     public static async Task<UserModel> GetBySession(string session)
     {
-      var collection = _db.GetCollection<UserModel>(_collection);
-
-      return await collection.Find(x => x.Session == session && x.IsActive).FirstOrDefaultAsync();
+      return await _collection.Find(x => x.Session == session && x.IsActive).FirstOrDefaultAsync();
     }
-
 
     /// <summary>
     /// Get all users
     /// </summary>
     public static async Task<List<UserModel>> GetAll()
     {
-      var collection = _db.GetCollection<UserModel>(_collection);
-
-      var results = await collection.Find(x => true).ToListAsync();
+      var results = await _collection.Find(x => true).ToListAsync();
 
       return (from x in results orderby x.Role, x.Username select x).ToList();
+    }
+
+    /// <summary>
+    /// Search users
+    /// </summary>
+    public static async Task<List<UserModel>> GetList(string keyword)
+    {
+      var builder = Builders<UserModel>.Filter;
+
+      var filtered = builder.Empty;
+
+      if(!keyword.IsEmpty())
+      filtered &= builder.Or(
+        builder.Regex(x => x.Id, new BsonRegularExpression(keyword, "i")),
+        builder.Regex(x => x.Username, new BsonRegularExpression(keyword, "i"))
+      );
+
+      return await _collection.Find(filtered)
+        .SortBy(x => x.Role).ThenBy(x => x.Id)
+        .ToListAsync();
     }
   }
 }

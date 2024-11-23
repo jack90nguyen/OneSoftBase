@@ -5,8 +5,8 @@
 @{
   Layout = null;
   var domain = (Request.IsHttps ? "https://" : "http://") + Request.Host.ToString();
-  var title = "Husble Spy";
-  var desc = "Husble Spy";
+  var title = DataService.AppTitle;
+  var desc = DataService.AppTitle;
   var cover = domain + "/images/cover.png";
   var icon = domain + "/favicon.png";
 }

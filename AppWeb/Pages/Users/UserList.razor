@@ -94,9 +94,9 @@
       editItem = new UserModel();
   }
 
-  private async Task RefeshItem(string id)
+  private async Task RefeshItem(long id)
   {
-    if(!string.IsNullOrEmpty(id))
+    if(id != 0)
     {
       var item = await UserData.GetById(id);
       if(item != null)
